@@ -1,0 +1,26 @@
+# Local/demo stack: docker compose up --build
+# First run: docker compose run --rm app npm --prefix server run db:reset   (creates schema + demo tenant "apex")
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: takt
+      POSTGRES_PASSWORD: takt
+      POSTGRES_DB: smarttakt
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U takt -d smarttakt"]
+      interval: 5s
+      retries: 10
+  app:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://takt:takt@db:5432/smarttakt
+      PGSSL: "false"
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
+      PLATFORM_ADMIN_KEY: ${PLATFORM_ADMIN_KEY:-}
+    ports: ["4000:4000"]
+volumes:
+  pgdata:

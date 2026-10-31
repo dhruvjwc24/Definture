@@ -1,0 +1,8 @@
+node_modules
+**/node_modules
+client/dist
+.git
+**/.env
+*.docx
+DocumentsForGrounding
+docs
