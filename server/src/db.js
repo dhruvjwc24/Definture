@@ -13,6 +13,12 @@ export const pool = new pg.Pool({
   max: Number(process.env.PG_POOL_MAX || 10),
 });
 
+// On Vercel (Fluid compute) let the platform close idle pool connections before a function instance is suspended.
+if (process.env.VERCEL) {
+  const { attachDatabasePool } = await import('@vercel/functions');
+  attachDatabasePool(pool);
+}
+
 export const query = (text, params) => pool.query(text, params);
 export const rows = async (text, params) => (await pool.query(text, params)).rows;
 export const one = async (text, params) => (await pool.query(text, params)).rows[0] || null;

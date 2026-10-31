@@ -24,3 +24,11 @@ lead@apex.com, operator@apex.com, planner@apex.com, quality@apex.com, supplier.a
 ## Cloud
 Set `DATABASE_URL`, `PGSSL=true`, a long random `JWT_SECRET` and `PLATFORM_ADMIN_KEY`; health probe `/api/health`.
 Never run `db:reset` against production. See `docs/` for BRD, requirements, stories, diagrams, design and install guide.
+
+## Vercel
+`vercel.json` builds `client/` to static files and serves the Express app (`server/src/app.js`) as a serverless function via `api/index.js`.
+1. Create a Neon Postgres database (Vercel → Storage → Neon). Use the pooled connection string (`-pooler` host).
+2. One time, against the empty Neon DB: `cd server && DATABASE_URL='<neon url>' PGSSL=true npm run db:schema && DATABASE_URL='<neon url>' PGSSL=true npm run db:seed`.
+3. In Vercel project settings add env vars: `DATABASE_URL`, `PGSSL=true`, `JWT_SECRET`, `PLATFORM_ADMIN_KEY`, `NODE_ENV=production`, `PG_POOL_MAX=3`.
+4. Import the repo at vercel.com/new (or run `vercel`), then check `/api/health`.
+`server/src/index.js` (with `listen`) remains the entrypoint for local dev and Docker.
